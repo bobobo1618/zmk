@@ -1,0 +1,23 @@
+description: |
+  Sensor driver for the Magalpha MA730 rotary encoder
+
+compatible: "magalpha,ma730"
+
+include: spi-device.yaml
+
+properties:
+  label:
+    type: string
+    required: true
+  a-gpios:
+    type: phandle-array
+    required: true
+    description: A pin for the encoder
+  b-gpios:
+    type: phandle-array
+    required: true
+    description: A pin for the encoder
+  resolution:
+    type: int
+    description: Number of pulses per tick
+    required: false
