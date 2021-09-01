@@ -18,25 +18,24 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
 #if ZMK_KEYMAP_HAS_SENSORS
 
-struct sensors_data_item {
-    uint8_t sensor_number;
+struct sensors_item_cfg {
+    uint8_t sensor_position;
     const struct device *dev;
     struct sensor_trigger trigger;
 };
 
 #define _SENSOR_ITEM(node)                                                                         \
-    {.dev = NULL, .trigger = {.type = SENSOR_TRIG_DELTA, .chan = SENSOR_CHAN_ROTATION}},
-#define SENSOR_ITEM(idx, _)                                                                        \
-    COND_CODE_1(DT_NODE_HAS_STATUS(ZMK_KEYMAP_SENSORS_BY_IDX(idx), okay),                          \
-                (_SENSOR_ITEM(ZMK_KEYMAP_SENSORS_BY_IDX(idx))), ())
+    {.dev = COND_CODE_0(DT_NODE_HAS_STATUS(node, okay), (NULL), (DEVICE_DT_GET(node))),            \
+     .trigger = {.type = SENSOR_TRIG_DELTA, .chan = SENSOR_CHAN_ROTATION}},
+#define SENSOR_ITEM(idx, _i) _SENSOR_ITEM(ZMK_KEYMAP_SENSORS_BY_IDX(idx))
 
-static struct sensors_data_item sensors[] = {UTIL_LISTIFY(ZMK_KEYMAP_SENSORS_LEN, SENSOR_ITEM, 0)};
+static struct sensors_item_cfg sensors[] = {UTIL_LISTIFY(ZMK_KEYMAP_SENSORS_LEN, SENSOR_ITEM, 0)};
 
 static void zmk_sensors_trigger_handler(const struct device *dev, struct sensor_trigger *trigger) {
     int err;
-    struct sensors_data_item *item = CONTAINER_OF(trigger, struct sensors_data_item, trigger);
+    struct sensors_item_cfg *item = CONTAINER_OF(trigger, struct sensors_item_cfg, trigger);
 
-    LOG_DBG("sensor %d", item->sensor_number);
+    LOG_DBG("sensor %d", item->sensor_position);
 
     err = sensor_sample_fetch(dev);
     if (err) {
@@ -44,34 +43,42 @@ static void zmk_sensors_trigger_handler(const struct device *dev, struct sensor_
         return;
     }
 
-    ZMK_EVENT_RAISE(new_zmk_sensor_event((struct zmk_sensor_event){
-        .sensor_number = item->sensor_number, .sensor = dev, .timestamp = k_uptime_get()}));
-}
+    struct sensor_value value;
+    err = sensor_channel_get(dev, item->trigger.chan, &value);
 
-static void zmk_sensors_init_item(const char *node, uint8_t i, uint8_t abs_i) {
-    LOG_DBG("Init %s at index %d with sensor_number %d", node, i, abs_i);
-
-    sensors[i].dev = device_get_binding(node);
-    sensors[i].sensor_number = abs_i;
-
-    if (!sensors[i].dev) {
-        LOG_WRN("Failed to find device for %s", node);
+    if (err) {
+        LOG_WRN("Failed to get channel data from device %d", err);
         return;
     }
 
-    sensor_trigger_set(sensors[i].dev, &sensors[i].trigger, zmk_sensors_trigger_handler);
+    ZMK_EVENT_RAISE(new_zmk_sensor_event(
+        (struct zmk_sensor_event){.sensor_position = item->sensor_position,
+                                  .channel_data = {(struct zmk_sensor_channel_data){
+                                      .value = value, .channel = item->trigger.chan}},
+                                  .timestamp = k_uptime_get()}));
 }
 
-#define _SENSOR_INIT(node) zmk_sensors_init_item(DT_LABEL(node), local_index++, absolute_index++);
-#define SENSOR_INIT(idx, _i)                                                                       \
-    COND_CODE_1(DT_NODE_HAS_STATUS(ZMK_KEYMAP_SENSORS_BY_IDX(idx), okay),                          \
-                (_SENSOR_INIT(ZMK_KEYMAP_SENSORS_BY_IDX(idx))), (absolute_index++;))
+static void zmk_sensors_init_item(uint8_t i) {
+    LOG_DBG("Init sensor at index %d", i);
+
+    sensors[i].sensor_position = i;
+
+    if (!sensors[i].dev) {
+        LOG_DBG("No local device for %d", i);
+        return;
+    }
+
+    int err = sensor_trigger_set(sensors[i].dev, &sensors[i].trigger, zmk_sensors_trigger_handler);
+    if (err) {
+        LOG_WRN("Failed to set sensor trigger (%d)", err);
+    }
+}
+
+#define _SENSOR_INIT(idx, _t) zmk_sensors_init_item(idx);
 
 static int zmk_sensors_init(const struct device *_arg) {
-    int local_index = 0;
-    int absolute_index = 0;
+    UTIL_LISTIFY(ZMK_KEYMAP_SENSORS_LEN, _SENSOR_INIT, 0)
 
-    UTIL_LISTIFY(ZMK_KEYMAP_SENSORS_LEN, SENSOR_INIT, 0)
     return 0;
 }
 

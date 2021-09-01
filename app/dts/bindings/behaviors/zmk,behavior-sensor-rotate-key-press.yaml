@@ -9,6 +9,9 @@ properties:
   label:
     type: string
     required: true
+  triggers-per-rotation:
+    type: int
+    required: false
   "#sensor-binding-cells":
     type: int
     required: true
