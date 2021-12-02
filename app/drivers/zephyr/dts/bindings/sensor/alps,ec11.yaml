@@ -19,3 +19,7 @@ properties:
     type: int
     description: Number of pulses per tick
     required: false
+  steps:
+    type: int
+    description: Number of pulses in one full rotation
+    required: false

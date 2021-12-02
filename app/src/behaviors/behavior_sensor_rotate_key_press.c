@@ -37,10 +37,12 @@ static int on_sensor_binding_triggered(struct zmk_behavior_binding *binding,
     const struct sensor_value *value = &channel_data[0].value;
     const struct behavior_sensor_rotate_key_press_cfg *cfg = behavior_dev->config;
     struct behavior_sensor_rotate_key_press_sensor_data *data = behavior_dev->data;
-
     uint32_t keycode;
 
-    data->remainder[event.position] += value->val1;
+    // Some funky special casing for "old encoder behavior" where ticks where reported in val2 only,
+    // instead of rotational degrees in val1.
+    data->remainder[event.position] +=
+	(value->val1 == 0 ? (value->val2 * cfg->activation_resolution) : value->val1);
 
     int8_t triggers = data->remainder[event.position] / cfg->activation_resolution;
     data->remainder[event.position] %= cfg->activation_resolution;

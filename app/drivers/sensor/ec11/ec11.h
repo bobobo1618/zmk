@@ -20,6 +20,7 @@ struct ec11_config {
     const uint8_t b_flags;
 
     const uint8_t resolution;
+    const uint8_t steps;
 };
 
 struct ec11_data {
