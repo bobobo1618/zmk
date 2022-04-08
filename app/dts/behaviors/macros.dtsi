@@ -7,13 +7,29 @@
 #define ZMK_MACRO_STRINGIFY(x) #x
 #define ZMK_MACRO(name,...) \
 	name: name { \
-			label = ZMK_MACRO_STRINGIFY(ZM_ ## name); \
-			compatible = "zmk,behavior-macro"; \
-			#binding-cells = <0>; \
-			__VA_ARGS__ \
-		};
+		label = ZMK_MACRO_STRINGIFY(ZM_ ## name); \
+		compatible = "zmk,behavior-macro"; \
+		#binding-cells = <0>; \
+		__VA_ARGS__ \
+	};
 
- / {
+#define ZMK_MACRO1(name,...) \
+	name: name { \
+		label = ZMK_MACRO_STRINGIFY(ZM_ ## name); \
+		compatible = "zmk,behavior-macro-one-param"; \
+		#binding-cells = <1>; \
+		__VA_ARGS__ \
+	};
+
+#define ZMK_MACRO2(name,...) \
+	name: name { \
+		label = ZMK_MACRO_STRINGIFY(ZM_ ## name); \
+		compatible = "zmk,behavior-macro-two-param"; \
+		#binding-cells = <2>; \
+		__VA_ARGS__ \
+	};
+
+/ {
 	behaviors {
 		macro_tap: macro_control_mode_tap {
 			compatible = "zmk,macro-control-mode-tap";
