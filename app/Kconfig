@@ -545,8 +545,10 @@ config ZMK_WPM
 	bool "Calculate WPM"
 	default n
 
-config SENSOR
-	default y
+DT_COMPAT_ZMK_KEYMAP_SENSORS := zmk,keymap-sensors
+config ZMK_KEYMAP_SENSORS
+	def_bool $(dt_compat_enabled,$(DT_COMPAT_ZMK_KEYMAP_SENSORS))
+	select SENSOR
 
 choice CBPRINTF_IMPLEMENTATION
 	default CBPRINTF_NANO
