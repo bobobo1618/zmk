@@ -435,6 +435,8 @@ endmenu
 
 menu "Advanced"
 
+rsource "src/shell/Kconfig"
+
 menu "Initialization Priorities"
 
 if USB_DEVICE_STACK

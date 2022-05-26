@@ -97,5 +97,6 @@ target_sources_ifdef(CONFIG_ZMK_BACKLIGHT app PRIVATE src/backlight.c)
 target_sources(app PRIVATE src/main.c)
 
 add_subdirectory(src/display/)
+add_subdirectory(src/shell/)
 
 zephyr_cc_option(-Wfatal-errors)

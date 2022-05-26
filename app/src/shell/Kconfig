@@ -1,0 +1,7 @@
+menu "Shell"
+
+config ZMK_SHELL_KEY_POSITIONS
+    bool "Key Position commands"
+    depends on SHELL
+    
+endmenu
