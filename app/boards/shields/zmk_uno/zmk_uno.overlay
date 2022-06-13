@@ -1,0 +1,103 @@
+/*
+ * Copyright (c) 2022 The ZMK Contributors
+ *
+ * SPDX-License-Identifier: MIT
+ */
+
+#include <dt-bindings/led/led.h>
+
+&arduino_i2c {
+	status = "okay";
+};
+
+&arduino_spi {
+	status = "okay";
+
+	led_strip: ws2812@0 {
+		compatible = "worldsemi,ws2812-spi";
+		label = "RGB";
+
+		/* SPI */
+		reg = <0>; /* ignored, but necessary for SPI bindings */
+		spi-max-frequency = <4000000>;
+
+		/* WS2812 */
+		chain-length = <7>; /* 4 underglow + 3 per-key LEDs */
+		spi-one-frame = <0x70>;
+		spi-zero-frame = <0x40>;
+
+		color-mapping = <LED_COLOR_ID_GREEN LED_COLOR_ID_RED LED_COLOR_ID_BLUE>;
+	};
+};
+
+/ {
+	chosen {
+		zmk,kscan = &kscan_matrix;
+		zmk,backlight = &backlight;
+		zmk,underglow = &led_strip;
+	};
+
+	ext-power {
+		compatible = "zmk,ext-power-generic";
+		label = "EXT_POWER";
+		init-delay-ms = <200>;
+		control-gpios = <&arduino_header 0 GPIO_ACTIVE_LOW>;
+	};
+
+	backlight: gpioleds {
+		compatible = "gpio-leds";
+		label = "Backlight LEDs";
+		gpio_led_0 {
+			gpios = <&arduino_header 12 GPIO_ACTIVE_HIGH>;
+			label = "Backlight LED 0";
+		};
+	};
+
+	kscan_matrix: kscan_matrix {
+		compatible = "zmk,kscan-gpio-matrix";
+
+		label = "KSCAN_MATRIX";
+
+		diode-direction = "col2row";
+
+		col-gpios
+			= <&arduino_header 10 GPIO_ACTIVE_HIGH>
+			, <&arduino_header 9  GPIO_ACTIVE_HIGH>
+			;
+
+		row-gpios
+			= <&arduino_header 13 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
+			, <&arduino_header 11 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
+			;
+
+	};
+
+	kscan_direct: kscan_direct {
+		compatible = "zmk,kscan-gpio-direct";
+		status = "disabled";
+
+		label = "KSCAN_DIRECT";
+
+		input-gpios
+			= <&arduino_header 10 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>
+			, <&arduino_header 9  (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>
+			, <&arduino_header 13 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>
+			, <&arduino_header 11 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>
+			;
+
+	};
+
+	encoder: encoder {
+		label = "ENCODER";
+		resolution = <4>;
+		compatible = "alps,ec11";
+		a-gpios = <&arduino_header 14 GPIO_PULL_UP>;
+		b-gpios = <&arduino_header 15 GPIO_PULL_UP>;
+	};
+
+	sensors {
+		compatible = "zmk,keymap-sensors";
+		sensors = <&encoder>;
+	};
+
+};
