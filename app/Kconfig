@@ -120,6 +120,22 @@ menuconfig ZMK_BLE
 
 if ZMK_BLE
 
+choice ZMK_BLE_PROFILE_MODE
+	prompt "Profile Mode"
+
+config ZMK_BLE_PROFILE_MODE_EXPLICIT
+	bool "Explicit"
+	help
+	    Explicit profile management of profiles, selecting which profile is active, etc.
+
+config ZMK_BLE_PROFILE_MODE_AUTOMATIC
+	bool "Automatic"
+	help
+	    Automatic profile management of profiles, the active profile is selected whenever
+		a host connects.
+
+endchoice
+
 config SYSTEM_WORKQUEUE_STACK_SIZE
 	default 4096 if SOC_RP2040
 	default 2048
@@ -157,6 +173,16 @@ config BT_DEVICE_APPEARANCE
 config ZMK_BLE_PASSKEY_ENTRY
 	bool "Experimental: Requiring typing passkey from host to pair BLE connection"
 	default n
+
+config ZMK_BLE_DIRECTED_ADVERTISING
+	bool "Experimental: Enable directed advertising to hosts"
+	default n
+	select BT_GATT_CLIENT
+
+config ZMK_BLE_PROFILE_AUTO_DISCONNECT
+	bool "Experimental: Disconnect connected centrals for non-selected profiles"
+	default n
+	depends on ZMK_BLE_DIRECTED_ADVERTISING
 
 config BT_PERIPHERAL_PREF_MIN_INT
 	default 6

@@ -7,6 +7,7 @@
 #pragma once
 
 #include <zephyr/bluetooth/addr.h>
+#include <zephyr/bluetooth/gatt.h>
 
 #define ZMK_BLE_PROFILE_NAME_MAX 15
 
