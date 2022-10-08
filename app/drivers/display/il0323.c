@@ -7,8 +7,8 @@
 #define DT_DRV_COMPAT gooddisplay_il0323
 
 #include <string.h>
-#include <device.h>
-#include <init.h>
+#include <zephyr/device.h>
+#include <zephyr/init.h>
 #include <drivers/display.h>
 #include <drivers/gpio.h>
 #include <drivers/spi.h>
@@ -16,7 +16,7 @@
 
 #include "il0323_regs.h"
 
-#include <logging/log.h>
+#include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(il0323, CONFIG_DISPLAY_LOG_LEVEL);
 
 /**
