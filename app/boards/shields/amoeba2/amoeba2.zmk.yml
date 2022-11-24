@@ -1,0 +1,11 @@
+file_format: "1"
+id: amoeba2
+name: Amoeba2
+type: shield
+requires: [pro_micro]
+exposes: [i2c_oled]
+features:
+  - keys
+siblings:
+  - amoeba2_left
+  - amoeba2_right

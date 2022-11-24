@@ -1,0 +1,8 @@
+# Copyright (c) 2022 The ZMK Contributors
+# SPDX-License-Identifier: MIT
+
+config SHIELD_AMOEBA2_LEFT
+	def_bool $(shields_list_contains,amoeba2_left)
+
+config SHIELD_AMOEBA2_RIGHT
+	def_bool $(shields_list_contains,amoeba2_right)
