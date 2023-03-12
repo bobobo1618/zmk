@@ -1,0 +1,11 @@
+file_format: "1"
+id: solderless
+name: Solderless
+type: shield
+requires: [pro_micro]
+exposes: [i2c_oled]
+features:
+  - keys
+siblings:
+  - solderless_left
+  - solderless_right
