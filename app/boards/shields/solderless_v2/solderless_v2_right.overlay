@@ -6,6 +6,53 @@
 
 #include "solderless_v2.dtsi"
 
+/ {
+
+	chosen {
+        cirque,pinnacle-spi = &cirque;
+	};
+};
+
 &default_transform {
 	col-offset = <5>;
+};
+
+&pinctrl {
+    spi2_default: spi2_default {
+        group1 {
+            psels = <NRF_PSEL(SPIM_SCK, 0, 8)>,
+                <NRF_PSEL(SPIM_MOSI, 0, 6)>,
+                <NRF_PSEL(SPIM_MISO, 0, 20)>;
+        };
+    };
+    spi2_sleep: spi2_sleep {
+        group1 {
+            psels = <NRF_PSEL(SPIM_SCK, 0, 8)>,
+                <NRF_PSEL(SPIM_MOSI, 0, 6)>,
+                <NRF_PSEL(SPIM_MISO, 0, 20)>;
+            low-power-enable;
+        };
+    };
+};
+
+&uart0 {
+    status = "disabled";
+};
+
+nice_view_spi: &spi2 {
+    compatible = "nordic,nrf-spim";
+    status = "okay";
+    
+    pinctrl-0 = <&spi2_default>;
+    pinctrl-1 = <&spi2_sleep>;
+    pinctrl-names = "default", "sleep";
+    cs-gpios = <&pro_micro 2 GPIO_ACTIVE_HIGH>;
+
+    cirque: pinnacle@0 {
+        compatible = "cirque,pinnacle-spi";
+        rotate-90 = <1>;
+        sleep = <1>;
+        reg = <0>;
+        spi-max-frequency = <4000000>;
+    };
 };
